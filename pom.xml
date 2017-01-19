@@ -21,9 +21,9 @@
 	</properties>
 
 	<scm>
-		<url>https://github.com/junkdog/transducers-java/</url>
-		<connection>scm:git:git@github.com:junkdog/transducers-java.git</connection>
-		<developerConnection>scm:git:git@github.com:junkdog/transducers-java.git</developerConnection>
+		<url>https://github.com/junkdog/transducers-kotlin/</url>
+		<connection>scm:git:git@github.com:junkdog/transducers-kotlin.git</connection>
+		<developerConnection>scm:git:git@github.com:junkdog/transducers-kotlin.git</developerConnection>
 	  <tag>HEAD</tag>
   </scm>
 
