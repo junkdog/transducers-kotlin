@@ -19,7 +19,6 @@ package net.onedaybeard.transducers
 
 import org.junit.Test
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.reflect.KFunction1
 import kotlin.test.assertEquals
 
 
@@ -28,19 +27,9 @@ class TransducersTest {
 
 	@Test
 	fun testMap() {
-
-
-		val stepFunction = object : StepFunction<String, String> {
-			override fun apply(result: String,
-			                   input: String,
-			                   reduced: AtomicBoolean): String = "$result$input "
-		}
-
-//		val rf: (String, String, AtomicBoolean) -> String = { "$result$input " }
-
 		transduce(
 			map(Int::toString),
-			stepFunction,
+			{ result, input -> "$result$input " },
 			"",
 			(0..9)
 		) assertEquals "0 1 2 3 4 5 6 7 8 9 "
@@ -56,7 +45,7 @@ class TransducersTest {
 			STRINGIFY,
 			ADD_STRING,
 			mutableListOf(),
-			longs(10)
+			(0..9L)
 		) assertEquals listOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
 	}
 
@@ -82,7 +71,7 @@ class TransducersTest {
 		vals.size assertEquals 30
 
 		var i = 0
-		(0..9).forEach { it assertEquals vals[i++] }
+		(0..9).forEach  { it assertEquals vals[i++] }
 		(0..19).forEach { it assertEquals vals[i++] }
 	}
 
@@ -90,15 +79,8 @@ class TransducersTest {
 	fun testMapcat() {
 		transduce(
 			mapcat { i: Int -> i.toString().toList() },
-			object : StepFunction<MutableList<Char>, Char> {
-				override fun apply(result: MutableList<Char>,
-				                   input: Char,
-				                   reduced: AtomicBoolean): MutableList<Char> {
-					result.add(input)
-					return result
-				}
-			},
-			mutableListOf(),
+			{ result, input: Char -> result.apply{ add(input) } },
+			mutableListOf<Char>(),
 			(0..9)
 		) assertEquals listOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 	}
@@ -219,7 +201,7 @@ class TransducersTest {
 	fun testPartitionBy() {
 		transduce(
 			partitionBy { i: Int -> i },
-/* \o/ */   { result, input -> result.apply { add(input.toList()) } },
+		   { result, input -> result.apply { add(input.toList()) } },
 			mutableListOf<Iterable<Int>>(),
 			listOf(1, 1, 1, 2, 2, 3, 4, 5, 5)
 		) assertEquals listOf(
@@ -296,8 +278,6 @@ class TransducersTest {
 			}
 		}
 	}
-
-	private fun longs(n: Int): Iterable<Long> = (0L..n - 1)
 
 	private infix fun <T> T.assertEquals(expected: T) = assertEquals(expected, this)
 
