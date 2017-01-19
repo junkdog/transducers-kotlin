@@ -22,3 +22,30 @@ The code in this repository is a marginally updated copy of https://gist.github.
 - http://clojure.org/transducers
 - http://blog.cognitect.com/blog/2014/8/6/transducers-are-coming
 - https://github.com/cognitect-labs/transducers-java
+
+### Getting started
+
+#### Community
+
+Share your thoughts and questions with us!
+
+- **[Gitter web chat](https://gitter.im/junkdog/artemis-odb)**
+- **[issues](https://github.com/junkdog/artemis-odb/issues)**
+
+## Getting started
+
+#### Maven
+
+```xml
+<dependency>
+	<groupId>net.onedaybeard.transducers</groupId>
+	<artifactId>transducers</artifactId>
+	<version>0.1.0</version>
+</dependency>
+```
+
+#### Gradle
+
+```groovy
+  dependencies { compile "net.onedaybeard.transducers:transducers:0.1.0" }
+```
