@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>net.onedaybeard.transducers</groupId>
@@ -18,14 +19,26 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<kotlin.version>1.0.6</kotlin.version>
+		<dokka.plugin.version>0.9.13</dokka.plugin.version>
 	</properties>
 
 	<scm>
 		<url>https://github.com/junkdog/transducers-kotlin/</url>
 		<connection>scm:git:git@github.com:junkdog/transducers-kotlin.git</connection>
 		<developerConnection>scm:git:git@github.com:junkdog/transducers-kotlin.git</developerConnection>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>jcenter</id>
+			<name>JCenter</name>
+			<url>https://jcenter.bintray.com/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</pluginRepository>
+	</pluginRepositories>
 
 	<distributionManagement>
 		<snapshotRepository>
@@ -137,6 +150,20 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-maven-plugin</artifactId>
 				<version>${kotlin.version}</version>
@@ -156,6 +183,29 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jetbrains.dokka</groupId>
+				<artifactId>dokka-maven-plugin</artifactId>
+				<version>${dokka.plugin.version}</version>
+				<executions>
+					<execution>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>dokka</goal>
+							<goal>javadocJar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<!--<outputFormat>javadoc</outputFormat>-->
+					<sourceLinks>
+						<link>
+							<dir>${project.basedir}/src/main/kotlin</dir>
+							<url>https://github.com/junkdog/transducers-kotlin</url>
+						</link>
+					</sourceLinks>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
