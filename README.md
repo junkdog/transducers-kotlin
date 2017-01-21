@@ -23,15 +23,6 @@ The code in this repository is a marginally updated copy of https://gist.github.
 - http://blog.cognitect.com/blog/2014/8/6/transducers-are-coming
 - https://github.com/cognitect-labs/transducers-java
 
-### Getting started
-
-#### Community
-
-Share your thoughts and questions with us!
-
-- **[Gitter web chat](https://gitter.im/junkdog/artemis-odb)**
-- **[issues](https://github.com/junkdog/artemis-odb/issues)**
-
 ## Getting started
 
 #### Maven
