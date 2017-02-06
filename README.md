@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/junkdog/transducers-kotlin.svg)](https://travis-ci.org/junkdog/transducers-kotlin)
+
 ## Transducers for kotlin
 
 The code in this repository is a marginally updated copy of https://gist.github.com/hastebrot/aa7b5366309d42270cc1.
