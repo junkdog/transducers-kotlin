@@ -273,10 +273,10 @@ fun <A> filter(p: (A) -> Boolean): Transducer<A, A> = object : Transducer<A, A> 
  * @param <B> input type of output reducing function
  * @return a new transducer
  */
-fun <A, B : Iterable<A>> cat(): Transducer<A, B> = object : Transducer<A, B> {
-	override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, B>(rf) {
+fun <A> cat(): Transducer<A, Iterable<A>> = object : Transducer<A, Iterable<A>> {
+	override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, Iterable<A>>(rf) {
 		override fun apply(result: R,
-		                   input: B,
+		                   input: Iterable<A>,
 		                   reduced: AtomicBoolean) = reduce(rf, result, input, reduced)
 	}
 }
