@@ -190,12 +190,26 @@ fun <R, A, B> transduce(xf: Transducer<A, B>,
 fun <R, A, B> transduce(xf: Transducer<A, B>,
                         rf: StepFunction<R, in A>,
                         init: R,
-                        input: Iterable<B>): R = reduce(xf.apply(completing(rf)), init, input)
+                        input: Iterable<B>): R = reduce(xf.apply(completing(rf)),
+                                                        init,
+                                                        input)
+
+fun <R, A, B> transduce(xf: Transducer<A, B>,
+                        rf: StepFunction<R, in A>,
+                        init: R,
+                        input: Sequence<B>): R = reduce(xf.apply(completing(rf)),
+                                                        init,
+                                                        input.asIterable())
 
 fun <R, A, B> transduce(xf: Transducer<A, B>,
                         rf: (R, A) -> R,
                         init: R,
                         input: Iterable<B>): R = transduce(xf, makeStepFunction(rf), init, input)
+
+fun <R, A, B> transduce(xf: Transducer<A, B>,
+                        rf: (R, A) -> R,
+                        init: R,
+                        input: Sequence<B>): R = transduce(xf, makeStepFunction(rf), init, input)
 
 fun <R : MutableCollection<A>, A, B> into(xf: Transducer<A, B>,
                                           init: R,

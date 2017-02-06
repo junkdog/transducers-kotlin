@@ -217,8 +217,8 @@ class TransducersTest {
 	fun testPartitionAll() {
 		transduce(
 			partitionAll<Int>(3),
-			{ result: MutableList<Iterable<Int>>, input -> result.apply { add(input.toList()) } },
-			mutableListOf(),
+			{ result, input -> result.apply { add(input.toList()) } },
+			mutableListOf<Iterable<Int>>(),
 			(0..9)
 		) assertEquals listOf(
 			listOf(0, 1, 2),
