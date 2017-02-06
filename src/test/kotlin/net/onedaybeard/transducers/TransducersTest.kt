@@ -63,7 +63,7 @@ class TransducersTest {
 	fun testCat() {
 		val data = listOf((0..9), (0..19))
 
-		val vals = transduce(xf = cat(),
+		val vals = transduce(xf = cat<Int>(),
 		                     rf = ADD_INT,
 		                     init = mutableListOf(),
 		                     input = data)
