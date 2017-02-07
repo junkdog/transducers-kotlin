@@ -3,6 +3,8 @@
 ## Transducers for kotlin
 
 The code in this repository is a marginally updated copy of https://gist.github.com/hastebrot/aa7b5366309d42270cc1.
+
+See [CHANGELOG.md](https://github.com/junkdog/transducers-kotlin/blob/master/CHANGELOG.md) for details.
  
 
 [Transducers](http://clojure.org/transducers) are composable algorithmic transformations. They are independent from the context of their input and output sources and specify only the essence of the transformation in terms of an individual element. Because transducers are decoupled from input or output sources, they can be used in many different processes - collections, streams, channels, observables, etc. Transducers compose directly, without awareness of input or creation of intermediate aggregates.
@@ -33,7 +35,7 @@ The code in this repository is a marginally updated copy of https://gist.github.
 <dependency>
 	<groupId>net.onedaybeard.transducers</groupId>
 	<artifactId>transducers</artifactId>
-	<version>0.1.0</version>
+	<version>0.2.0</version>
 </dependency>
 ```
 
