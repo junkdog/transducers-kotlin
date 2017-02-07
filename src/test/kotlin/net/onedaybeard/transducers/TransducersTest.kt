@@ -62,10 +62,11 @@ class TransducersTest {
     fun testCat() {
         val data = listOf((0..9), (0..19))
 
-        val vals = transduce(xf = cat<Int>() +
-                                  assertSingleCompletion<Int>(),
+        val vals = transduce(xf = healtInspector<Iterable<Int>>(tag = "list", indent = 0) +
+                                  cat<Int>() +
+                                  healtInspector<Int>(tag = "item", indent = 8),
                              rf = ADD_INT,
-                             init = mutableListOf(),
+                             init = mutableListOf<Int>(),
                              input = data)
 
         vals.size assertEquals 30
@@ -281,25 +282,5 @@ class TransducersTest {
 
     private infix fun <T> T.assertEquals(expected: T) = assertEquals(expected, this)
 
-    fun <A> assertSingleCompletion(tag: String = "") = object : Transducer<A, A> {
-        override fun <R> apply(rf: ReducingFunction<R, A>): ReducingFunction<R, A> {
-            return object : ReducingFunction<R, A> {
-                var invoked = false
-                val prefix = if (tag.isEmpty()) "" else "$tag: "
 
-                override fun apply(): R  = rf.apply()
-
-                override fun apply(result: R): R {
-                    if (invoked) throw AssertionError("${prefix}invoked twice: apply(result=$result)")
-
-                    invoked = true
-                    return rf.apply(result)
-                }
-
-                override fun apply(result: R,
-                                   input: A,
-                                   reduced: AtomicBoolean): R = rf.apply(result, input, reduced)
-            }
-        }
-    }
 }

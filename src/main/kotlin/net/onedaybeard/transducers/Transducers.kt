@@ -142,13 +142,15 @@ interface Transducer<out B, C> {
 fun <R, T> reduce(f: ReducingFunction<R, in T>,
                   result: R,
                   input: Iterable<T>,
-                  reduced: AtomicBoolean = AtomicBoolean()): R {
+                  reduced: AtomicBoolean = AtomicBoolean(),
+                  completing: Boolean = true): R {
     var ret = result
     for (t in input) {
         ret = f.apply(ret, t, reduced)
         if (reduced.get()) break
     }
-    return f.apply(ret)
+
+    return if (completing) f.apply(ret) else ret
 }
 
 fun <R, T> completing(sf: StepFunction<R, T>): ReducingFunction<R, T> =
@@ -277,7 +279,11 @@ fun <A> cat(): Transducer<A, Iterable<A>> = object : Transducer<A, Iterable<A>> 
     override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, Iterable<A>>(rf) {
         override fun apply(result: R,
                            input: Iterable<A>,
-                           reduced: AtomicBoolean) = reduce(rf, result, input, reduced)
+                           reduced: AtomicBoolean) = reduce(f = rf,
+                                                            result = result,
+                                                            input = input,
+                                                            reduced = reduced,
+                                                            completing = false)
     }
 }
 
