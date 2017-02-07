@@ -597,3 +597,6 @@ fun <A> partitionAll(n: Int): Transducer<Iterable<A>, A> = object : Transducer<I
         }
     }
 }
+
+operator fun <A, B, C> Transducer<B, C>.plus(right: Transducer<A, in B>): Transducer<A, C>
+    = this.comp(right)

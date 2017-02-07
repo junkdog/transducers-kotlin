@@ -62,7 +62,8 @@ class TransducersTest {
     fun testCat() {
         val data = listOf((0..9), (0..19))
 
-        val vals = transduce(xf = cat<Int>().comp(assertSingleCompletion<Int>()),
+        val vals = transduce(xf = cat<Int>() +
+                                  assertSingleCompletion<Int>(),
                              rf = ADD_INT,
                              init = mutableListOf(),
                              input = data)
