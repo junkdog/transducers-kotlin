@@ -63,7 +63,7 @@ class TransducersTest {
 	fun testCat() {
 		val data = listOf((0..9), (0..19))
 
-		val vals = transduce(xf = cat<Int>(),
+		val vals = transduce(xf = cat<Int>().comp(assertSingleCompletion<Int>()),
 		                     rf = ADD_INT,
 		                     init = mutableListOf(),
 		                     input = data)
@@ -201,7 +201,7 @@ class TransducersTest {
 	fun testPartitionBy() {
 		transduce(
 			partitionBy { i: Int -> i },
-		   { result, input -> result.apply { add(input.toList()) } },
+			{ result, input -> result.apply { add(input.toList()) } },
 			mutableListOf<Iterable<Int>>(),
 			listOf(1, 1, 1, 2, 2, 3, 4, 5, 5)
 		) assertEquals listOf(
@@ -281,4 +281,25 @@ class TransducersTest {
 
 	private infix fun <T> T.assertEquals(expected: T) = assertEquals(expected, this)
 
+	fun <A> assertSingleCompletion(tag: String = "") = object : Transducer<A, A> {
+		override fun <R> apply(rf: ReducingFunction<R, A>): ReducingFunction<R, A> {
+			return object : ReducingFunction<R, A> {
+				var invoked = false
+				val prefix = if (tag.isEmpty()) "" else "$tag: "
+
+				override fun apply(): R  = rf.apply()
+
+				override fun apply(result: R): R {
+					if (invoked) throw AssertionError("${prefix}invoked twice: apply(result=$result)")
+
+					invoked = true
+					return rf.apply(result)
+				}
+
+				override fun apply(result: R,
+				                   input: A,
+				                   reduced: AtomicBoolean): R = rf.apply(result, input, reduced)
+			}
+		}
+	}
 }
