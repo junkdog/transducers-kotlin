@@ -8,8 +8,8 @@
 	<packaging>jar</packaging>
 	<name>transducers</name>
 
-	<description>Build-time code-execution for java, a bit like transducers in C++11</description>
-	<url>https://github.com/junkdog/ConstExpr</url>
+	<description>clojure-like transducers for kotlin</description>
+	<url>https://github.com/junkdog/transducers-kotlin</url>
 
 	<prerequisites>
 		<maven>3.1.1</maven>
