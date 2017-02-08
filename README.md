@@ -42,5 +42,5 @@ See [CHANGELOG.md](https://github.com/junkdog/transducers-kotlin/blob/master/CHA
 #### Gradle
 
 ```groovy
-  dependencies { compile "net.onedaybeard.transducers:transducers:0.1.0" }
+  dependencies { compile "net.onedaybeard.transducers:transducers:0.2.2" }
 ```
