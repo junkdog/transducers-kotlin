@@ -1,6 +1,7 @@
 ## Change Log (we do our best to adhere to [semantic versioning](http://semver.org/))
 
 #### Version: 0.3.0-SNAPSHOT
+- Int conversion of Long transducer parameters 
 
 
 #### Version: 0.2.2 - 2017-02-08

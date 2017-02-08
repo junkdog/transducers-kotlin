@@ -317,7 +317,7 @@ fun <A> remove(p: (A) -> Boolean): Transducer<A, A> = filter { !p(it) }
  * @param <A> input type of input and output reducing functions
  * @return a new transducer
  */
-fun <A> take(n: Long): Transducer<A, A> = object : Transducer<A, A> {
+fun <A> take(n: Int): Transducer<A, A> = object : Transducer<A, A> {
     override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
         private var taken = 0L
         override fun apply(result: R,
@@ -366,7 +366,7 @@ fun <A> takeWhile(p: (A) -> Boolean): Transducer<A, A> = object : Transducer<A, 
  * @param <A> input type of input and output reducing functions
  * @return a new transducer
  */
-fun <A> drop(n: Long): Transducer<A, A> = object : Transducer<A, A> {
+fun <A> drop(n: Int): Transducer<A, A> = object : Transducer<A, A> {
     override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
         private var dropped = 0L
         override fun apply(result: R,
@@ -414,7 +414,7 @@ fun <A> dropWhile(p: (A) -> Boolean): Transducer<A, A> = object : Transducer<A, 
  * @param <A> The input type of the input and output reducing functions
  * @return a new transducer
  */
-fun <A> takeNth(n: Long): Transducer<A, A> = object : Transducer<A, A> {
+fun <A> takeNth(n: Int): Transducer<A, A> = object : Transducer<A, A> {
     override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
         private var nth = 0L
         override fun apply(result: R,
@@ -464,7 +464,7 @@ fun <A : Any> keep(f: (A) -> A?): Transducer<A, A> = object : Transducer<A, A> {
  * @param <A> the input type of the input and output reducing functions
  * @return a new transducer
  */
-fun <A : Any> keepIndexed(f: (Long, A) -> A?): Transducer<A, A> = object : Transducer<A, A> {
+fun <A : Any> keepIndexed(f: (Int, A) -> A?): Transducer<A, A> = object : Transducer<A, A> {
     override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
         private var n = 0L
         override fun apply(result: R,
