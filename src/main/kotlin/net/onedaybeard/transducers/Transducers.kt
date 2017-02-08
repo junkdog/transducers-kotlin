@@ -359,6 +359,30 @@ fun <A> takeWhile(p: (A) -> Boolean): Transducer<A, A> = object : Transducer<A, 
     }
 }
 
+fun <A> distinct(): Transducer<A, A> = object : Transducer<A, A> {
+    override fun <R> apply(rf: ReducingFunction<R, A>) = object : ReducingFunction<R, A> {
+        val intercepted = mutableSetOf<A>()
+
+        override fun apply(result: R): R {
+            intercepted.clear()
+            return rf.apply(result)
+        }
+
+        override fun apply(result: R,
+                           input: A,
+                           reduced: AtomicBoolean): R {
+
+            if (intercepted.add(input)) {
+                return rf.apply(result, input, reduced)
+            } else {
+                return result
+            }
+        }
+
+        override fun apply(): R = rf.apply()
+    }
+}
+
 /**
  * Creates a transducer that transforms a reducing function such that
  * it skips n inputs, then processes the rest of the inputs.
