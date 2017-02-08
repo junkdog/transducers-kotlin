@@ -3,7 +3,7 @@
 #### Version: 0.3.0-SNAPSHOT
 
 
-#### Version: 0.2.0 - 2017-02-08
+#### Version: 0.2.2 - 2017-02-08
 - compose transducers with `+`.
 - transduce accepts sequences as input.
 - `cat()` transducer signature more explicit (vs type inference).

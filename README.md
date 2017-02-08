@@ -35,7 +35,7 @@ See [CHANGELOG.md](https://github.com/junkdog/transducers-kotlin/blob/master/CHA
 <dependency>
 	<groupId>net.onedaybeard.transducers</groupId>
 	<artifactId>transducers</artifactId>
-	<version>0.2.0</version>
+	<version>0.2.2</version>
 </dependency>
 ```
 
