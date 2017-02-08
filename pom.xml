@@ -4,7 +4,7 @@
 
 	<groupId>net.onedaybeard.transducers</groupId>
 	<artifactId>transducers</artifactId>
-	<version>0.2.2</version>
+	<version>0.2.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>transducers</name>
 
@@ -25,7 +25,7 @@
 		<url>https://github.com/junkdog/transducers-kotlin/</url>
 		<connection>scm:git:git@github.com:junkdog/transducers-kotlin.git</connection>
 		<developerConnection>scm:git:git@github.com:junkdog/transducers-kotlin.git</developerConnection>
-		<tag>transducers-0.2.2</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<pluginRepositories>
