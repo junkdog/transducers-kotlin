@@ -183,29 +183,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.jetbrains.dokka</groupId>
-				<artifactId>dokka-maven-plugin</artifactId>
-				<version>${dokka.plugin.version}</version>
-				<executions>
-					<execution>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>dokka</goal>
-							<goal>javadocJar</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<!--<outputFormat>javadoc</outputFormat>-->
-					<sourceLinks>
-						<link>
-							<dir>${project.basedir}/src/main/kotlin</dir>
-							<url>https://github.com/junkdog/transducers-kotlin</url>
-						</link>
-					</sourceLinks>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -255,6 +232,46 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+						<groupId>org.jetbrains.dokka</groupId>
+						<artifactId>dokka-maven-plugin</artifactId>
+						<version>${dokka.plugin.version}</version>
+						<executions>
+							<execution>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>dokka</goal>
+									<goal>javadocJar</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<!--<outputFormat>javadoc</outputFormat>-->
+							<sourceLinks>
+								<link>
+									<dir>${project.basedir}/src/main/kotlin</dir>
+									<url>https://github.com/junkdog/transducers-kotlin</url>
+								</link>
+							</sourceLinks>
+						</configuration>
+					</plugin>
+					<!--<plugin>-->
+						<!--<groupId>org.apache.maven.plugins</groupId>-->
+						<!--<artifactId>maven-jar-plugin</artifactId>-->
+						<!--<executions>-->
+							<!--<execution>-->
+								<!--<id>empty-javadoc-jar</id>-->
+								<!--<phase>package</phase>-->
+								<!--<goals>-->
+									<!--<goal>jar</goal>-->
+								<!--</goals>-->
+								<!--<configuration>-->
+									<!--<classifier>javadoc</classifier>-->
+									<!--<classesDirectory>${basedir}/javadoc</classesDirectory>-->
+								<!--</configuration>-->
+							<!--</execution>-->
+						<!--</executions>-->
+					<!--</plugin>-->
 					<plugin>
 						<groupId>org.sonatype.plugins</groupId>
 						<artifactId>nexus-staging-maven-plugin</artifactId>
