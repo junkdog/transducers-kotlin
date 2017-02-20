@@ -2,6 +2,7 @@
 
 #### Version: 0.3.0-SNAPSHOT
 - Int conversion of Long transducer parameters 
+- **new transducer**: `distinct`
 
 
 #### Version: 0.2.2 - 2017-02-08

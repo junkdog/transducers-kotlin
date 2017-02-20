@@ -77,6 +77,18 @@ class TransducersTest {
     }
 
     @Test
+    fun testDistinct() {
+        val data = listOf("HELlO", "Hello", "hELLO", "HELlO", "HElLO", "hElLO", "hellO")
+
+        transduce(xf = map(String::toLowerCase)
+                       + distinct(),
+                  rf = { result, input -> result.apply { add(input) } },
+                  init = mutableListOf<String>(),
+                  input = data
+         ) assertEquals listOf("hello")
+    }
+
+    @Test
     fun testMapcat() {
         transduce(
             mapcat { i: Int -> i.toString().toList() },
@@ -181,7 +193,7 @@ class TransducersTest {
         val addInt = { result: MutableList<Int>, input: Int -> result.apply { add(input) } }
 
         transduce(
-            keepIndexed { index, value -> if ( index == 1L || index == 4L ) value else null },
+            keepIndexed { index, value -> if ( index == 1 || index == 4 ) value else null },
             addInt,
             mutableListOf(),
             (0..9)
