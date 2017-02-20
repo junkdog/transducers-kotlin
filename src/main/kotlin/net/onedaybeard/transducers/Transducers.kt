@@ -319,7 +319,7 @@ fun <A> remove(p: (A) -> Boolean): Transducer<A, A> = filter { !p(it) }
  */
 fun <A> take(n: Int): Transducer<A, A> = object : Transducer<A, A> {
     override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
-        private var taken = 0L
+        private var taken = 0
         override fun apply(result: R,
                            input: A,
                            reduced: AtomicBoolean): R {
@@ -392,7 +392,7 @@ fun <A> distinct(): Transducer<A, A> = object : Transducer<A, A> {
  */
 fun <A> drop(n: Int): Transducer<A, A> = object : Transducer<A, A> {
     override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
-        private var dropped = 0L
+        private var dropped = 0
         override fun apply(result: R,
                            input: A,
                            reduced: AtomicBoolean): R {
@@ -440,11 +440,11 @@ fun <A> dropWhile(p: (A) -> Boolean): Transducer<A, A> = object : Transducer<A, 
  */
 fun <A> takeNth(n: Int): Transducer<A, A> = object : Transducer<A, A> {
     override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
-        private var nth = 0L
+        private var nth = 0
         override fun apply(result: R,
                            input: A,
                            reduced: AtomicBoolean): R {
-            return if ((nth++ % n) == 0L) rf.apply(result, input, reduced) else result
+            return if ((nth++ % n) == 0) rf.apply(result, input, reduced) else result
         }
     }
 }
@@ -490,7 +490,7 @@ fun <A : Any> keep(f: (A) -> A?): Transducer<A, A> = object : Transducer<A, A> {
  */
 fun <A : Any> keepIndexed(f: (Int, A) -> A?): Transducer<A, A> = object : Transducer<A, A> {
     override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
-        private var n = 0L
+        private var n = 0
         override fun apply(result: R,
                            input: A,
                            reduced: AtomicBoolean): R {
