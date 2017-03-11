@@ -23,8 +23,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * A reducing step function.
- * @param <R> Type of first argument and return value
- * @param <T> Type of input to reduce
+ * @param [R] Type of first argument and return value
+ * @param [T] Type of input to reduce
  */
 interface StepFunction<R, in T> {
     /**
@@ -54,14 +54,13 @@ private inline fun <R, T> makeStepFunction(crossinline step: (R, T) -> R): StepF
     }
 }
 
-
 /**
  * A complete reducing function. Extends a single reducing step
  * function and adds a zero-arity function for initializing a new
  * result and a single-arity function for processing the final
  * result after the reduction process has completed.
- * @param <R> Type of first argument and return value
- * @param <T> Type of input to reduce
+ * @param [R] Type of first argument and return value
+ * @param [T] Type of input to reduce
  */
 interface ReducingFunction<R, in T> : StepFunction<R, T> {
     /**
@@ -84,12 +83,12 @@ interface ReducingFunction<R, in T> : StepFunction<R, T> {
  * delegate to the chained reducing function. Derived classes must implement
  * the three-arity overload of apply, and may implement either of the other
  * two overloads as required.
- * @param <R> Type of first argument and return value of the reducing functions
- * @param <A> Input type of reducing function being chained to
- * @param <B> Input type of this reducing function
+ * @param [R] Type of first argument and return value of the reducing functions
+ * @param [A] Input type of reducing function being chained to
+ * @param [B] Input type of this reducing function
  */
 abstract class ReducingFunctionOn<R, in A, in B>(
-    val rf: ReducingFunction<R, in A>) : ReducingFunction<R, B> {
+    val rf: ReducingFunction<R, A>) : ReducingFunction<R, B> {
 
     override fun apply() = rf.apply()
     override fun apply(result: R) = rf.apply(result)
@@ -99,8 +98,8 @@ abstract class ReducingFunctionOn<R, in A, in B>(
  * A Transducer transforms a reducing function of one type into a
  * reducing function of another (possibly the same) type, applying
  * mapping, filtering, flattening, etc. logic as desired.
- * @param <B> The type of data processed by an input process
- * @param <C> The type of data processed by the transduced process
+ * @param [B] The type of data processed by an input process
+ * @param [C] The type of data processed by the transduced process
  */
 interface Transducer<out B, C> {
     /**
@@ -111,18 +110,19 @@ interface Transducer<out B, C> {
      *           reducing functions
      * @return The transformed reducing function
      */
-    fun <R> apply(rf: ReducingFunction<R, in B>): ReducingFunction<R, C>
+    fun <R> apply(rf: ReducingFunction<R, B>): ReducingFunction<R, C>
 
     /**
      * Composes a transducer with another transducer, yielding
      * a new transducer.
+     *
      * @param right the transducer to compose with this transducer
      * @param <A> the type of input processed by the reducing function
      *           the composed transducer returns when applied
      * @return A new composite transducer
      */
     fun <A> comp(right: Transducer<A, in B>): Transducer<A, C> = object : Transducer<A, C> {
-        override fun <R> apply(rf: ReducingFunction<R, in A>) = this@Transducer.apply(right.apply(rf))
+        override fun <R> apply(rf: ReducingFunction<R, A>) = this@Transducer.apply(right.apply(rf))
     }
 }
 
@@ -139,7 +139,7 @@ interface Transducer<out B, C> {
  * @param <T> the type of each item in input
  * @return the final reduced result
  */
-fun <R, T> reduce(f: ReducingFunction<R, in T>,
+fun <R, T> reduce(f: ReducingFunction<R, T>,
                   result: R,
                   input: Iterable<T>,
                   reduced: AtomicBoolean = AtomicBoolean(),
@@ -153,6 +153,11 @@ fun <R, T> reduce(f: ReducingFunction<R, in T>,
     return if (completing) f.apply(ret) else ret
 }
 
+/**
+ * Converts a [StepFunction] into a complete [ReducingFunction]. If [sf] is already
+ * a `StepFunction`, returns it without modification; otherwise returns a new
+ * `ReducingFunction` with a step function that forwards to [sf].
+ */
 fun <R, T> completing(sf: StepFunction<R, T>): ReducingFunction<R, T> =
     sf as? ReducingFunction ?: object : ReducingFunction<R, T> {
         override fun apply(result: R,
@@ -167,13 +172,13 @@ fun <R, T> completing(sf: StepFunction<R, T>): ReducingFunction<R, T> =
  * @param xf a transducer (or composed transducers) that transforms the reducing function
  * @param rf a reducing function
  * @param input the input to reduce
- * @param <R> return type
- * @param <A> type of input expected by reducing function
- * @param <B> type of input and type accepted by reducing function returned by transducer
+ * @param [R] return type
+ * @param [A] type of input expected by reducing function
+ * @param [B] type of input and type accepted by reducing function returned by transducer
  * @return result of reducing transformed input
  */
 fun <R, A, B> transduce(xf: Transducer<A, B>,
-                        rf: ReducingFunction<R, in A>,
+                        rf: ReducingFunction<R, A>,
                         input: Iterable<B>): R = reduce(xf.apply(rf), rf.apply(), input)
 
 /**
@@ -184,20 +189,20 @@ fun <R, A, B> transduce(xf: Transducer<A, B>,
  * @param rf a reducing function
  * @param init an initial value to start reducing process
  * @param input the input to reduce
- * @param <R> return type
- * @param <A> type expected by reducing function
- * @param <B> type of input and type accepted by reducing function returned by transducer
+ * @param [R] return type
+ * @param [A] type expected by reducing function
+ * @param [B] type of input and type accepted by reducing function returned by transducer
  * @return result of reducing transformed input
  */
 fun <R, A, B> transduce(xf: Transducer<A, B>,
-                        rf: StepFunction<R, in A>,
+                        rf: StepFunction<R, A>,
                         init: R,
                         input: Iterable<B>): R = reduce(xf.apply(completing(rf)),
                                                         init,
                                                         input)
 
 fun <R, A, B> transduce(xf: Transducer<A, B>,
-                        rf: StepFunction<R, in A>,
+                        rf: StepFunction<R, A>,
                         init: R,
                         input: Sequence<B>): R = reduce(xf.apply(completing(rf)),
                                                         init,
@@ -213,20 +218,8 @@ fun <R, A, B> transduce(xf: Transducer<A, B>,
                         init: R,
                         input: Sequence<B>): R = transduce(xf, makeStepFunction(rf), init, input)
 
-fun <R : MutableCollection<A>, A, B> into(xf: Transducer<A, B>,
-                                          init: R,
-                                          input: Iterable<B>): R =
-    transduce(xf, object : ReducingFunction<R, A> {
-        override fun apply(result: R,
-                           input: A,
-                           reduced: AtomicBoolean): R {
-            result.add(input)
-            return result
-        }
-    }, init, input)
-
 /**
- * Composes a transducer with another transducer, yielding a new transducer that
+ * Composes a transducer with another transducer, yielding a new transducer.
  * @param left left hand transducer
  * @param right right hand transducer
  */
@@ -237,8 +230,8 @@ fun <A, B, C> compose(left: Transducer<B, C>,
  * Creates a transducer that transforms a reducing function by applying a mapping
  * function to each input.
  * @param f a mapping function from one type to another (can be the same type)
- * @param <A> input type of input reducing function
- * @param <B> input type of output reducing function
+ * @param [A] input type of input reducing function
+ * @param [B] input type of output reducing function
  * @return a new transducer
  */
 fun <A, B> map(f: (B) -> A): Transducer<A, B> = object : Transducer<A, B> {
@@ -254,11 +247,11 @@ fun <A, B> map(f: (B) -> A): Transducer<A, B> = object : Transducer<A, B> {
  * predicate to each input and processing only those inputs for which the
  * predicate is true.
  * @param p a predicate function
- * @param <A> input type of input and output reducing functions
+ * @param [A] input type of input and output reducing functions
  * @return a new transducer
  */
 fun <A> filter(p: (A) -> Boolean): Transducer<A, A> = object : Transducer<A, A> {
-    override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
+    override fun <R> apply(rf: ReducingFunction<R, A>) = object : ReducingFunctionOn<R, A, A>(rf) {
         override fun apply(result: R,
                            input: A,
                            reduced: AtomicBoolean): R {
@@ -271,12 +264,12 @@ fun <A> filter(p: (A) -> Boolean): Transducer<A, A> = object : Transducer<A, A> 
 /**
  * Creates a transducer that transforms a reducing function by accepting
  * an iterable of the expected input type and reducing it
- * @param <A> input type of input reducing function
- * @param <B> input type of output reducing function
+ * @param [A] input type of input reducing function
+ * @param [B] input type of output reducing function
  * @return a new transducer
  */
 fun <A> cat(): Transducer<A, Iterable<A>> = object : Transducer<A, Iterable<A>> {
-    override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, Iterable<A>>(rf) {
+    override fun <R> apply(rf: ReducingFunction<R, A>) = object : ReducingFunctionOn<R, A, Iterable<A>>(rf) {
         override fun apply(result: R,
                            input: Iterable<A>,
                            reduced: AtomicBoolean) = reduce(f = rf,
@@ -291,10 +284,10 @@ fun <A> cat(): Transducer<A, Iterable<A>> = object : Transducer<A, Iterable<A>> 
  * Creates a transducer that transforms a reducing function using
  * a composition of map and cat.
  * @param f a mapping function from one type to another (can be the same type)
- * @param <A> input type of input reducing function
- * @param <B> output type of output reducing function and iterable of input type
+ * @param [A] input type of input reducing function
+ * @param [B] output type of output reducing function and iterable of input type
  *           of input reducing function
- * @param <C> input type of output reducing function
+ * @param [C] input type of output reducing function
  * @return a new transducer
  */
 fun <A, B : Iterable<A>, C> mapcat(f: (C) -> B): Transducer<A, C> =
@@ -305,7 +298,7 @@ fun <A, B : Iterable<A>, C> mapcat(f: (C) -> B): Transducer<A, C> =
  * predicate to each input and not processing those inputs for which the
  * predicate is true.
  * @param p a predicate function
- * @param <A> input type of input and output reducing functions
+ * @param [A] input type of input and output reducing functions
  * @return a new transducer
  */
 fun <A> remove(p: (A) -> Boolean): Transducer<A, A> = filter { !p(it) }
@@ -314,11 +307,11 @@ fun <A> remove(p: (A) -> Boolean): Transducer<A, A> = filter { !p(it) }
  * Creates a transducer that transforms a reducing function such that
  * it only processes n inputs, then the reducing process stops.
  * @param n the number of inputs to process
- * @param <A> input type of input and output reducing functions
+ * @param [A] input type of input and output reducing functions
  * @return a new transducer
  */
 fun <A> take(n: Int): Transducer<A, A> = object : Transducer<A, A> {
-    override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
+    override fun <R> apply(rf: ReducingFunction<R, A>) = object : ReducingFunctionOn<R, A, A>(rf) {
         private var taken = 0
         override fun apply(result: R,
                            input: A,
@@ -340,11 +333,11 @@ fun <A> take(n: Int): Transducer<A, A> = object : Transducer<A, A> {
  * it processes inputs as long as the provided predicate returns true.
  * If the predicate returns false, the reducing process stops.
  * @param p a predicate used to test inputs
- * @param <A> input type of input and output reducing functions
+ * @param [A] input type of input and output reducing functions
  * @return a new transducer
  */
 fun <A> takeWhile(p: (A) -> Boolean): Transducer<A, A> = object : Transducer<A, A> {
-    override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
+    override fun <R> apply(rf: ReducingFunction<R, A>) = object : ReducingFunctionOn<R, A, A>(rf) {
         override fun apply(result: R,
                            input: A,
                            reduced: AtomicBoolean): R {
@@ -387,11 +380,11 @@ fun <A> distinct(): Transducer<A, A> = object : Transducer<A, A> {
  * Creates a transducer that transforms a reducing function such that
  * it skips n inputs, then processes the rest of the inputs.
  * @param n the number of inputs to skip
- * @param <A> input type of input and output reducing functions
+ * @param [A] input type of input and output reducing functionsi
  * @return a new transducer
  */
 fun <A> drop(n: Int): Transducer<A, A> = object : Transducer<A, A> {
-    override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
+    override fun <R> apply(rf: ReducingFunction<R, A>) = object : ReducingFunctionOn<R, A, A>(rf) {
         private var dropped = 0
         override fun apply(result: R,
                            input: A,
@@ -417,7 +410,7 @@ fun <A> drop(n: Int): Transducer<A, A> = object : Transducer<A, A> {
  * @return a new transducer
  */
 fun <A> dropWhile(p: (A) -> Boolean): Transducer<A, A> = object : Transducer<A, A> {
-    override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
+    override fun <R> apply(rf: ReducingFunction<R, A>) = object : ReducingFunctionOn<R, A, A>(rf) {
         private var drop = true
         override fun apply(result: R,
                            input: A,
@@ -435,11 +428,11 @@ fun <A> dropWhile(p: (A) -> Boolean): Transducer<A, A> = object : Transducer<A, 
  * Creates a transducer that transforms a reducing function such that
  * it processes every nth input.
  * @param n The frequence of inputs to process (e.g., 3 processes every third input).
- * @param <A> The input type of the input and output reducing functions
+ * @param [A] The input type of the input and output reducing functions
  * @return a new transducer
  */
 fun <A> takeNth(n: Int): Transducer<A, A> = object : Transducer<A, A> {
-    override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
+    override fun <R> apply(rf: ReducingFunction<R, A>) = object : ReducingFunctionOn<R, A, A>(rf) {
         private var nth = 0
         override fun apply(result: R,
                            input: A,
@@ -454,7 +447,7 @@ fun <A> takeNth(n: Int): Transducer<A, A> = object : Transducer<A, A> {
  * inputs that are keys in the provided map are replaced by the corresponding
  * value in the map.
  * @param smap a map of replacement values
- * @param <A> the input type of the input and output reducing functions
+ * @param [A] the input type of the input and output reducing functions
  * @return a new transducer
  */
 fun <A> replace(smap: Map<A, A>): Transducer<A, A> {
@@ -466,11 +459,11 @@ fun <A> replace(smap: Map<A, A>): Transducer<A, A> {
  * function to each input and processing the resulting value, ignoring values
  * that are null.
  * @param f a function for processing inputs
- * @param <A> the input type of the input and output reducing functions
+ * @param [A] the input type of the input and output reducing functions
  * @return a new transducer
  */
 fun <A : Any> keep(f: (A) -> A?): Transducer<A, A> = object : Transducer<A, A> {
-    override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
+    override fun <R> apply(rf: ReducingFunction<R, A>) = object : ReducingFunctionOn<R, A, A>(rf) {
         override fun apply(result: R,
                            input: A,
                            reduced: AtomicBoolean): R {
@@ -489,7 +482,7 @@ fun <A : Any> keep(f: (A) -> A?): Transducer<A, A> = object : Transducer<A, A> {
  * @return a new transducer
  */
 fun <A : Any> keepIndexed(f: (Int, A) -> A?): Transducer<A, A> = object : Transducer<A, A> {
-    override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
+    override fun <R> apply(rf: ReducingFunction<R, A>) = object : ReducingFunctionOn<R, A, A>(rf) {
         private var n = 0
         override fun apply(result: R,
                            input: A,
@@ -505,11 +498,11 @@ fun <A : Any> keepIndexed(f: (Int, A) -> A?): Transducer<A, A> = object : Transd
  * Creates a transducer that transforms a reducing function such that
  * consecutive identical input values are removed, only a single value
  * is processed.
- * @param <A> the input type of the input and output reducing functions
+ * @param [A] the input type of the input and output reducing functions
  * @return a new transducer
  */
 fun <A : Any> dedupe(): Transducer<A, A> = object : Transducer<A, A> {
-    override fun <R> apply(rf: ReducingFunction<R, in A>) = object : ReducingFunctionOn<R, A, A>(rf) {
+    override fun <R> apply(rf: ReducingFunction<R, A>) = object : ReducingFunctionOn<R, A, A>(rf) {
         var prior: A? = null
         override fun apply(result: R,
                            input: A,
@@ -529,7 +522,7 @@ fun <A : Any> dedupe(): Transducer<A, A> = object : Transducer<A, A> {
  * Creates a transducer that transforms a reducing function such that
  * it has the specified probability of processing each input.
  * @param prob the probability between expressed as a value between 0 and 1.
- * @param <A> the input type of the input and output reducing functions
+ * @param [A] the input type of the input and output reducing functions
  * @return a new transducer
  */
 fun <A : Any> randomSample(prob: Double): Transducer<A, A> =
@@ -543,12 +536,12 @@ fun <A : Any> randomSample(prob: Double): Transducer<A, A> =
  * the partitioning function returns for a given input is different from the value
  * returned for the previous input.
  * @param f the partitioning function
- * @param <A> the input type of the input and output reducing functions
- * @param <P> the type returned by the partitioning function
+ * @param [A] the input type of the input and output reducing functions
+ * @param [P] the type returned by the partitioning function
  * @return a new transducer
  */
 fun <A, P> partitionBy(f: (A) -> P): Transducer<Iterable<A>, A> = object : Transducer<Iterable<A>, A> {
-    override fun <R> apply(rf: ReducingFunction<R, in Iterable<A>>) = object : ReducingFunction<R, A> {
+    override fun <R> apply(rf: ReducingFunction<R, Iterable<A>>) = object : ReducingFunction<R, A> {
         val part = ArrayList<A>()
         val mark: Any = Unit
         var prior: Any? = mark
@@ -593,11 +586,11 @@ fun <A, P> partitionBy(f: (A) -> P): Transducer<Iterable<A>, A> = object : Trans
  * them to the next reducing function when enough inputs have been accrued. Processes
  * any remaining buffered inputs when the reducing process completes.
  * @param n the size of each partition
- * @param <A> the input type of the input and output reducing functions
+ * @param [A] the input type of the input and output reducing functions
  * @return a new transducer
  */
 fun <A> partitionAll(n: Int): Transducer<Iterable<A>, A> = object : Transducer<Iterable<A>, A> {
-    override fun <R> apply(rf: ReducingFunction<R, in Iterable<A>>) = object : ReducingFunction<R, A> {
+    override fun <R> apply(rf: ReducingFunction<R, Iterable<A>>) = object : ReducingFunction<R, A> {
         val part = ArrayList<A>()
 
         override fun apply(): R = rf.apply()

@@ -41,8 +41,8 @@ class TransducersTest {
         ) assertEquals listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
         transduce(
-            STRINGIFY,
-            ADD_STRING,
+            stringify,
+            addString,
             mutableListOf(),
             (0..9L)
         ) assertEquals listOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
@@ -52,7 +52,7 @@ class TransducersTest {
     fun testFilter() {
         transduce(
             filter { it % 2 != 0 },
-            ADD_INT,
+            addInt,
             mutableListOf(),
             (0..9)
         ) assertEquals listOf(1, 3, 5, 7, 9)
@@ -62,10 +62,10 @@ class TransducersTest {
     fun testCat() {
         val data = listOf((0..9), (0..19))
 
-        val vals = transduce(xf = healtInspector<Iterable<Int>>(tag = "list", indent = 0) +
+        val vals = transduce(xf = healthInspector<Iterable<Int>>(tag = "list", indent = 0) +
                                   cat<Int>() +
-                                  healtInspector<Int>(tag = "item", indent = 8),
-                             rf = ADD_INT,
+                                  healthInspector<Int>(tag = "item", indent = 4),
+                             rf = addInt,
                              init = mutableListOf<Int>(),
                              input = data)
 
@@ -80,8 +80,8 @@ class TransducersTest {
     fun testDistinct() {
         val data = listOf("HELlO", "Hello", "hELLO", "HELlO", "HElLO", "hElLO", "hellO")
 
-        transduce(xf = map(String::toLowerCase)
-                       + distinct(),
+        transduce(xf = map(String::toLowerCase) +
+                       distinct(),
                   rf = { result, input -> result.apply { add(input) } },
                   init = mutableListOf<String>(),
                   input = data
@@ -130,7 +130,7 @@ class TransducersTest {
     fun testTakeWhile() {
         transduce(
             takeWhile { it < 10 },
-            ADD_INT,
+            addInt,
             mutableListOf(),
             (0..19)
         ) assertEquals listOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
@@ -140,7 +140,7 @@ class TransducersTest {
     fun testDrop() {
         transduce(
             drop(5),
-            ADD_INT,
+            addInt,
             mutableListOf(),
             (0..9)
         ) assertEquals listOf(5, 6, 7, 8, 9)
@@ -150,7 +150,7 @@ class TransducersTest {
     fun testDropWhile() {
         transduce(
             dropWhile { it < 10 },
-            ADD_INT,
+            addInt,
             mutableListOf(),
             (0..19)
         ) assertEquals listOf(10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
@@ -160,7 +160,7 @@ class TransducersTest {
     fun testTakeNth() {
         transduce(
             takeNth(2),
-            ADD_INT,
+            addInt,
             mutableListOf(),
             (0..9)
         ) assertEquals listOf(0, 2, 4, 6, 8)
@@ -170,7 +170,7 @@ class TransducersTest {
     fun testReplace() {
         transduce(
             replace(mapOf(3 to 42)),
-            ADD_INT,
+            addInt,
             mutableListOf(),
             (0..4)
         ) assertEquals listOf(0, 1, 2, 42, 4)
@@ -204,7 +204,7 @@ class TransducersTest {
     fun testDedupe() {
         transduce(
             dedupe(),
-            ADD_INT,
+            addInt,
             mutableListOf(),
             listOf(1, 2, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 0)
         ) assertEquals listOf(1, 2, 3, 4, 5, 0)
@@ -246,7 +246,7 @@ class TransducersTest {
         val m = map<Int, Int> { it * 2 }
         val input = (0..19)
 
-        val ADD_NUMBER = object : StepFunction<MutableCollection<Number>, Number> {
+        val addNumber = object : StepFunction<MutableCollection<Number>, Number> {
             override fun apply(result: MutableCollection<Number>,
                                input: Number,
                                reduced: AtomicBoolean): MutableCollection<Number> {
@@ -257,23 +257,23 @@ class TransducersTest {
 
         transduce(
             m,
-            ADD_NUMBER,
+            addNumber,
             mutableListOf<Number>(),
             input
         ).size assertEquals 20
 
         transduce(
             m.comp(filter<Number> { it.toDouble() > 10.0 }),
-            ADD_NUMBER,
+            addNumber,
             mutableListOf<Number>(),
             input
         ).size assertEquals 14
     }
 
     private companion object {
-        val STRINGIFY = map(Long::toString)
+        val stringify = map(Long::toString)
 
-        val ADD_STRING = object : StepFunction<MutableList<String>, String> {
+        val addString = object : StepFunction<MutableList<String>, String> {
             override fun apply(result: MutableList<String>,
                                input: String,
                                reduced: AtomicBoolean): MutableList<String> {
@@ -282,7 +282,7 @@ class TransducersTest {
             }
         }
 
-        val ADD_INT = object : StepFunction<MutableList<Int>, Int> {
+        val addInt = object : StepFunction<MutableList<Int>, Int> {
             override fun apply(result: MutableList<Int>,
                                input: Int,
                                reduced: AtomicBoolean): MutableList<Int> {
@@ -291,8 +291,4 @@ class TransducersTest {
             }
         }
     }
-
-    private infix fun <T> T.assertEquals(expected: T) = assertEquals(expected, this)
-
-
 }
