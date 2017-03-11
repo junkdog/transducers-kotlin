@@ -190,7 +190,7 @@
 				<version>${dokka.plugin.version}</version>
 				<executions>
 					<execution>
-						<phase>package</phase>
+						<phase>prepare-package</phase>
 						<goals>
 							<goal>dokka</goal>
 							<goal>javadocJar</goal>
@@ -226,7 +226,7 @@
 		<profile>
 			<id>release</id>
 			<properties>
-				<apidocs.path>${project.basedir}/target/dokka</apidocs.path>
+				<dokka.skip>false</dokka.skip>
 			</properties>
 			<build>
 				<plugins>
