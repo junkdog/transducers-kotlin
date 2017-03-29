@@ -147,6 +147,40 @@ fun <A> debug(tag: String, indent: Int = 0) = object : Transducer<A, A> {
 }
 
 /**
+ * Takes a list of transducers producing [A], and turns it into a
+ * single composed transducer producing a list of [A]. Supplied
+ * transducers can produce zero or more output per input value,
+ * and rely on completion to flush any internal state.
+ *
+ * If transducers require conditional evaluation, working with [mux]
+ * in `promiscuous` mode may be an alternative approach, as
+ * it supports input routing using predicates.
+ *
+ * Note that each of the supplied transducers reset the transduction (?)
+ * state between inputs, thus stateful transducers, such as [distinct], are
+ * scoped to each input value
+ *
+ * @see mux
+ */
+fun <A, B> join(xfs: List<Xf<A, B>>): Xf<List<A>, B> = object : Xf<List<A>, B> {
+    override fun <R> apply(rf: Rf<R, List<A>>) = object : RfOn<R, List<A>, B>(rf) {
+        val subXf = xfs.map { Signal({ true }, it) }
+                .toTypedArray()
+                .let { mux(*it, promiscuous = true) }
+
+        override fun apply(result: R,
+                           input: B,
+                           reduced: AtomicBoolean): R {
+
+            return rf.apply(result,
+                            listOf(subXf, input.withIterable()),
+                            reduced)
+        }
+    }
+}
+
+
+/**
  * Returns a transducer creating [Pair]s, with values provided
  * via transducers [l] and [r]. Each value transducer runs a full
  * transducible process/lifecycle per input, allowing for
@@ -219,6 +253,7 @@ inline fun <B, reified K, reified V> mapPair(l: Xf<K, B>,
  *
  * @sample samples.Samples.mux_a
  * @sample samples.Samples.mux_b
+ * @see join
  */
 fun <A, B> mux(vararg xfs: Signal<A, B>,
                promiscuous: Boolean = false) = muxing(xfs, promiscuous) +

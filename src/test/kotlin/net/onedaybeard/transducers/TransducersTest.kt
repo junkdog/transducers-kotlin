@@ -19,7 +19,6 @@ package net.onedaybeard.transducers
 
 import org.junit.Test
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.test.assertEquals
 
 
 class TransducersTest {

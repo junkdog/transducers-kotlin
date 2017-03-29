@@ -1,6 +1,7 @@
 package net.onedaybeard.transducers
 
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 
 fun <A> copy() = object : Transducer<A, A> {
@@ -13,7 +14,8 @@ fun <A> copy() = object : Transducer<A, A> {
 }
 
 fun <A> assertCompletionSanity(tag: String = "",
-                               resettable: Boolean = false) = object : Xf<A, A> {
+                               resettable: Boolean = false,
+                               stats: Stats = Stats()) = object : Xf<A, A> {
 
     override fun <R> apply(rf: ReducingFunction<R, A>): ReducingFunction<R, A> {
         return object : ReducingFunction<R, A> {
@@ -23,6 +25,7 @@ fun <A> assertCompletionSanity(tag: String = "",
             override fun apply(): R {
                 if (resettable) invoked = false
 
+                stats.inits++
                 return rf.apply()
             }
 
@@ -30,6 +33,7 @@ fun <A> assertCompletionSanity(tag: String = "",
                 if (invoked)
                     throw AssertionError("${prefix}invoked x2: apply(result=$result)")
 
+                stats.completions++
                 invoked = true
                 return rf.apply(result)
             }
@@ -40,6 +44,7 @@ fun <A> assertCompletionSanity(tag: String = "",
                 if (invoked)
                     throw AssertionError("${prefix}result already computed")
 
+                stats.steps++
                 return rf.apply(result, input, reduced)
             }
         }
@@ -58,3 +63,7 @@ fun <A> healthInspector(tag: String? = null,
 }
 
 infix fun <T> T.assertEquals(expected: T) = kotlin.test.assertEquals(expected, this)
+
+data class Stats(var inits: Int = 0,
+                 var steps: Int = 0,
+                 var completions: Int = 0)

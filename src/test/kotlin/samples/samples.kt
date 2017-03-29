@@ -44,35 +44,35 @@ class Samples {
 
     @Sample
     fun mux_a() {
-        intoList(xf = mux(isEven@ // labels only for readability
-                          { i: Int -> i % 2 == 0 }
-                                  wires map { i: Int -> i * 100 } +
-                                        filter { it != 400 },
+        listOf(xf = mux(isEven@ // labels only for readability
+                        { i: Int -> i % 2 == 0 }
+                                wires map { i: Int -> i * 100 } +
+                                      filter { it != 400 },
 
-                          leetify@
-                          { i: Int -> i == 3 }
-                                  wires map { _: Int -> 1337 } +
-                                        collect() + // releases on final result
-                                        cat()),
-                 input = (0..9)
+                        leetify@
+                        { i: Int -> i == 3 }
+                                wires map { _: Int -> 1337 } +
+                                      collect() + // releases on final result
+                                      cat()),
+               input = (0..9)
         ) assertEquals listOf(0, 200, 600, 800, 1337)
     }
 
     @Sample
     fun mux_b() {
         // promiscuous = true: input goes through all applicable transducers
-        intoList(xf = mux({ i: Int -> i % 1 == 0 }
-                                  wires map { i: Int -> i / 2 } +
-                                        distinct(),
+        listOf(xf = mux({ i: Int -> i % 1 == 0 }
+                                wires map { i: Int -> i / 2 } +
+                                      distinct(),
 
-                          { i: Int -> i % 2 == 0 }
-                                  wires map { it },
+                        { i: Int -> i % 2 == 0 }
+                                wires map { it },
 
-                          { i: Int -> i % 3 == 0 }
-                                  wires map { i: Int -> i * 100 } +
-                                        copy(),
-                          promiscuous = true),
-                 input = (0..6)
+                        { i: Int -> i % 3 == 0 }
+                                wires map { i: Int -> i * 100 } +
+                                      copy(),
+                        promiscuous = true),
+               input = (0..6)
         ) assertEquals listOf(0, 0, 0, 0,     // input: 0
                                               // input: 1
                               1, 2,           // input: 2
@@ -85,9 +85,8 @@ class Samples {
     @Sample
     fun sum_a() {
         // collecting single result into list
-        intoList(xf = filter { i: Int -> 4 > i } +
-                      sum<Int>(),
-                 input = (0..10)
+        listOf(xf = filter<Int> { 4 > it } + sum<Int>(),
+               input = (0..10)
         ) assertEquals listOf(1 + 2 + 3)
     }
 

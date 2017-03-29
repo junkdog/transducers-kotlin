@@ -1,6 +1,13 @@
 ## Change Log (we do our best to adhere to [semantic versioning](http://semver.org/))
 
 #### Version: 0.4.0-SNAPSHOT
+- *deprecated*
+  - `into`, intoList`, `intoSet`
+  
+- transduce into collections with `listOf(xf, input)` and `setOf(xf, input)`.
+- transduce into maps with `mapOf`, `mapOfLists`, `mapOfSets`.
+- **new higher-order transducers**:
+  - `join`: turns `List<Transducer<A, B>>` into `Transducer<List<A>, B>`.
 
 
 #### Version: 0.3.0 - 2017-03-12
