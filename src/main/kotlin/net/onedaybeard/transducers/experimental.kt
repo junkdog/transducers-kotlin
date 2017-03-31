@@ -18,6 +18,10 @@ typealias RfOn<R, A, B> = ReducingFunctionOn<R, A, B>
  */
 data class Signal<out A, B>(val selector: (B) -> Boolean,
                             val xf: Transducer<A, B>)
+
+private data class SignalRf<in A, in B, R>(val test: (B) -> Boolean,
+                                           val rf: ReducingFunction<R, A>)
+
 /**
  * Creates a [Signal].
  *
@@ -26,9 +30,6 @@ data class Signal<out A, B>(val selector: (B) -> Boolean,
 infix fun <A, B> ((B) -> Boolean).wires(xf: Transducer<A, B>) : Signal<A, B> {
     return Signal(this, xf)
 }
-
-private data class Mux<in A, in B, R>(val test: (B) -> Boolean,
-                                      val rf: ReducingFunction<R, A>)
 
 /**
  * Returns a branching transducer, routing each input through
@@ -147,6 +148,48 @@ fun <A> debug(tag: String, indent: Int = 0) = object : Transducer<A, A> {
 }
 
 /**
+ * Returns a transducer which only takes the first [n] elements. Acts
+ * similar to `cat() + take(n)`, but does not end the reduction process
+ * after each batch of input.
+ *
+ * @see tail
+ * @see cat
+ */
+fun <A> head(n: Int): Xf<A, Iterable<A>> = object : Xf<A, Iterable<A>>  {
+    override fun <R> apply(rf: Rf<R, A>)  = object : RfOn<R, A, Iterable<A>>(rf) {
+        override fun apply(result: R,
+                           input: Iterable<A>,
+                           reduced: AtomicBoolean): R {
+
+            return transduce(xf = take(n),
+                             rf = { res: R, a: A -> rf.apply(res, a, reduced) },
+                             init = result,
+                             input = input)
+        }
+    }
+}
+
+private fun <A> headcat(n: Int,
+                        inputOp: (Iterable<A>) -> Iterable<A>)
+        = object : Xf<A, Iterable<A>>  {
+
+    override fun <R> apply(rf: Rf<R, A>): Rf<R, Iterable<A>>
+            = object : RfOn<R, A, Iterable<A>>(rf) {
+
+        override fun apply(result: R,
+                           input: Iterable<A>,
+                           reduced: AtomicBoolean): R {
+
+            return transduce(xf = take(n),
+                             rf = { res: R, a: A -> rf.apply(res, a, AtomicBoolean()) },
+                             init = result,
+                             input = input)
+        }
+    }
+}
+
+
+/**
  * Takes a list of transducers producing [A], and turns it into a
  * single composed transducer producing a list of [A]. Supplied
  * transducers can produce zero or more output per input value,
@@ -179,6 +222,7 @@ fun <A, B> join(xfs: List<Xf<A, B>>): Xf<List<A>, B> = object : Xf<List<A>, B> {
     }
 }
 
+fun <A, B> join(vararg xfs: Xf<A, B>): Xf<List<A>, B> = join(xfs.toList())
 
 /**
  * Returns a transducer creating [Pair]s, with values provided
@@ -255,19 +299,20 @@ inline fun <B, reified K, reified V> mapPair(l: Xf<K, B>,
  * @sample samples.Samples.mux_b
  * @see join
  */
-fun <A, B> mux(vararg xfs: Signal<A, B>,
+fun <A, B> mux(xfs: List<Signal<A, B>>,
                promiscuous: Boolean = false) = muxing(xfs, promiscuous) +
                                                resultGate(xfs.size)
+fun <A, B> mux(vararg xfs: Signal<A, B>,
+               promiscuous: Boolean = false) = muxing(xfs.asIterable(), promiscuous) +
+                                               resultGate(xfs.size)
 
-private fun <A, B> muxing(xfs: Array<out Signal<A, B>>,
+
+
+private fun <A, B> muxing(xfs: Iterable<Signal<A, B>>,
                           promiscuous: Boolean = false) = object : Xf<A, B> {
     override fun <R> apply(rf: Rf<R, A>) = object : Rf<R, B> {
 
-        val rfs = intoList(xf = map { s: Signal<A, B> -> Mux(s.selector,
-                                                             s.xf.apply(rf))},
-                           input = xfs.asIterable())
-
-
+        val rfs = xfs.map { SignalRf(it.selector, it.xf.apply(rf)) }
 
         override fun apply(result: R): R {
             var r = result
@@ -282,7 +327,7 @@ private fun <A, B> muxing(xfs: Array<out Signal<A, B>>,
                            reduced: AtomicBoolean): R {
 
             val maxMatchedRfs = if (promiscuous) rfs.size else 1
-            return transduce(xf = filter { s: Mux<B, B, R> -> s.test(input) } +
+            return transduce(xf = filter { s: SignalRf<B, B, R> -> s.test(input) } +
                                   take(maxMatchedRfs),
                              rf = { _: R, mux -> mux.rf.apply(result, input, reduced) },
                              init = result,
@@ -507,6 +552,49 @@ inline fun <reified A : Any, B> subducing(xf: Xf<A, B>,
                            input: A,
                            reduced: AtomicBoolean): A = input
     })
+}
+
+/**
+ * Creates a transducer which only processes the last [n] elements
+ * per input iterable.
+ *
+ * @see head
+ * @see cat
+ */
+fun <A> tail(n: Int): Xf<A, Iterable<A>> = object : Xf<A, Iterable<A>> {
+    override fun <R> apply(rf: Rf<R, A>) = object : RfOn<R, A, Iterable<A>>(rf) {
+
+        val tailed = LinkedList<A>()
+
+        override fun apply(result: R,
+                           input: Iterable<A>,
+                           reduced: AtomicBoolean): R {
+
+            var res = result
+            val reduceAction: (A) -> Unit = { res = rf.apply(res, it, reduced) }
+
+            when (input) {
+                is List<A> -> {
+                    input.takeLast(n).forEach(reduceAction)
+                }
+                else -> {
+                    input.forEach { tailed.push(it, maxSize = n) }
+                    tailed.forEach(reduceAction)
+                    tailed.clear()
+                }
+            }
+
+            return res
+        }
+    }
+}
+
+internal fun <A> MutableList<A>.push(element: A, maxSize: Int) {
+    val diff = (size + 1) - maxSize
+    if (diff > 0)
+        (1..diff).forEach { removeAt(0) }
+
+    add(element)
 }
 
 class Dummy {

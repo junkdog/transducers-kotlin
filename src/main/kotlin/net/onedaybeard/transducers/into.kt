@@ -1,8 +1,5 @@
 package net.onedaybeard.transducers
 
-import java.util.concurrent.atomic.AtomicBoolean
-
-
 @Suppress("UNCHECKED_CAST")
 @Deprecated(message = "moving toward kotlin-like naming conventions",
             replaceWith = ReplaceWith("listOf(xf, input)"))

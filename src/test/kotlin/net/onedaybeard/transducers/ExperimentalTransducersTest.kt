@@ -69,6 +69,16 @@ class ExperimentalTransducersTest {
     }
 
     @Test
+    fun test_head() {
+        listOf(head(3), 1..9) assertEquals listOf(1, 2, 3)
+    }
+
+    @Test
+    fun test_tail() {
+        listOf(tail(3), 1..9) assertEquals listOf(7, 8, 9)
+    }
+
+    @Test
     fun test_join() {
         val xfs = listOf(filter { i: Int -> i % 2 == 0 } + copy() + map { it * 100 },
                          map { it * 2 },

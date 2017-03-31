@@ -1,13 +1,16 @@
 ## Change Log (we do our best to adhere to [semantic versioning](http://semver.org/))
 
 #### Version: 0.4.0-SNAPSHOT
-- *deprecated*
-  - `into`, intoList`, `intoSet`
+- **deprecated**
+  - `into`, `intoList`, `intoSet` superseded by more kotlin-like alternatives.
   
 - transduce into collections with `listOf(xf, input)` and `setOf(xf, input)`.
 - transduce into maps with `mapOf`, `mapOfLists`, `mapOfSets`.
+- **new regular transducers**:
+  - `head`: takes the first elements of an iterable input.
+  - `tail`: takes the last elements of an iterable input.
 - **new higher-order transducers**:
-  - `join`: turns `List<Transducer<A, B>>` into `Transducer<List<A>, B>`.
+  - `join`: turns a list of `Transducer<A, B>` into `Transducer<List<A>, B>`.
 
 
 #### Version: 0.3.0 - 2017-03-12

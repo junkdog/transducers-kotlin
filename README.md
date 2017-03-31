@@ -32,17 +32,17 @@ transduce(xf = composedTransducer,
 ) assertEquals (1 + 2 + 3 + 4)
 ```
 
-`intoList` and `intoSet` wraps `transduce`, the step function is encapsulated, it simply
- adds each input to the collection.
+Kotlin-like shorthands for transducing straight into a collection: `listOf`, `setOf`, and
+`mapOf` take _transducer_ and _input_. 
 
 ```kotlin
-intoList(xf = copy<Int>() +
-              branch(test = { it % 4 == 0 },
-                     xfTrue  = map { i: Int -> i * 100 },
-                     xfFalse = map { i: Int -> i / 4 } +
-                               distinct() +
-                               map(Int::toString)),
-         input = (1..9)
+listOf(xf = copy<Int>() +
+            branch(test = { it % 4 == 0 },
+                   xfTrue  = map { i: Int -> i * 100 },
+                   xfFalse = map { i: Int -> i / 4 } +
+                             distinct() +
+                             map(Int::toString)),
+       input = (1..9)
 ) assertEquals listOf("0", 400, 400, "1", 800, 800, "2")
 ```
 
@@ -53,12 +53,15 @@ _Experimental_ implies transducers not included with [transducers-java](https://
   - `collect`: input into a mutable collection, releases it upon computing the final result.
   - `debug`: prints debug statements.
   - `distinct`: no two equal elements shall pass.
+  - `head`: takes the first elements of an iterable input.
   - `pairCat`: concatenates `Pair<A, Iterable<B>>` into `Pair<A, B>`.
   - `resultGate`: ensures _completion_ is calculated once, used with branching/muxing transducers.
   - `sort`: collects and sorts all input.
+  - `tail`: takes the last elements of an iterable input.
 
 ### new higher-order transducers
   - `branch`: routes input through one out of two transducers, based on predicate.
+  - `join`: turns `List<Transducer<A, B>>` into `Transducer<List<A>, B>`.
   - `mapPair`: creates pairs based on two transducers. 
   - `mux`: input multiplexer, routing input over several transducer paths based on predicates.
 
@@ -91,14 +94,14 @@ Spasi's [Transducers.kt][orig-gist1] and [TransducersTest.kt][orig-gist2] from O
 <dependency>
     <groupId>net.onedaybeard.transducers</groupId>
     <artifactId>transducers</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-dependencies { compile "net.onedaybeard.transducers:transducers:0.3.0" }
+dependencies { compile "net.onedaybeard.transducers:transducers:0.4.0" }
 ```
 
 
@@ -106,5 +109,5 @@ dependencies { compile "net.onedaybeard.transducers:transducers:0.3.0" }
  [test-src]: https://github.com/junkdog/transducers-kotlin/tree/master/src/test/kotlin/net/onedaybeard/transducers
  [orig-gist1]: https://gist.github.com/Spasi/4052e4e8c8d88a7325fb
  [orig-gist2]: https://gist.github.com/Spasi/2a9d7d420b20f37513d5
- [api-docs]: http://junkdog.github.io/doc/transducers-kotlin/0.3.0/net.onedaybeard.transducers/index.html
+ [api-docs]: http://junkdog.github.io/doc/transducers-kotlin/0.4.0/net.onedaybeard.transducers/index.html
  
