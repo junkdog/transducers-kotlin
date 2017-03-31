@@ -109,5 +109,5 @@ dependencies { compile "net.onedaybeard.transducers:transducers:0.4.0" }
  [test-src]: https://github.com/junkdog/transducers-kotlin/tree/master/src/test/kotlin/net/onedaybeard/transducers
  [orig-gist1]: https://gist.github.com/Spasi/4052e4e8c8d88a7325fb
  [orig-gist2]: https://gist.github.com/Spasi/2a9d7d420b20f37513d5
- [api-docs]: http://junkdog.github.io/doc/transducers-kotlin/0.4.0/net.onedaybeard.transducers/index.html
+ [api-docs]: http://junkdog.github.io/apidoc/transducers-0.4.0/net.onedaybeard.transducers/index.html
  
