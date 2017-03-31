@@ -1,6 +1,9 @@
 ## Change Log (we do our best to adhere to [semantic versioning](http://semver.org/))
 
-#### Version: 0.4.0-SNAPSHOT
+#### Version: 0.5.0-SNAPSHOT 
+
+
+#### Version: 0.4.0 - 2017-04-01
 - **deprecated**
   - `into`, `intoList`, `intoSet` superseded by more kotlin-like alternatives.
   
